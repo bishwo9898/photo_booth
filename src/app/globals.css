@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f4f1;
+  --foreground: #161410;
+  --muted: #7f746a;
+  --accent: #b48a52;
+  --accent-soft: #e5d6c3;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-playfair);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f0e0c;
+    --foreground: #f3f0ec;
+    --muted: #b7aea4;
+    --accent: #d2a86b;
+    --accent-soft: #3a2f22;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  letter-spacing: 0.01em;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.grain-overlay {
+  background-image: radial-gradient(
+      circle at 20% 20%,
+      rgba(255, 255, 255, 0.5),
+      rgba(255, 255, 255, 0)
+    ),
+    radial-gradient(circle at 80% 30%, rgba(212, 179, 129, 0.25), transparent),
+    radial-gradient(circle at 60% 80%, rgba(168, 137, 91, 0.18), transparent);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.float-slow {
+  animation: floatSlow 12s ease-in-out infinite;
+}
+
+.float-medium {
+  animation: floatMedium 9s ease-in-out infinite;
+}
+
+.calendar-frame {
+  transform-origin: top center;
+  transform-style: preserve-3d;
+}
+
+.calendar-flip {
+  animation: calendarFlip 0.6s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+@keyframes calendarFlip {
+  0% {
+    transform: perspective(1000px) rotateX(0deg);
+  }
+  40% {
+    transform: perspective(1000px) rotateX(-12deg);
+  }
+  100% {
+    transform: perspective(1000px) rotateX(0deg);
+  }
+}
+
+@keyframes floatSlow {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes floatMedium {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
