@@ -459,47 +459,50 @@ export default function Home() {
             Wedding Photography
           </p>
           <h1
-            className="text-2xl font-semibold tracking-tight text-[#1b1915]"
+            className="text-4xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#2a1f1a] to-[#c9a86e]"
             style={{ fontFamily: "var(--font-playfair)" }}
           >
-            Ever after
+            Ever After
           </h1>
         </div>
-        <nav className="flex flex-wrap items-center gap-6 text-xs font-semibold uppercase tracking-[0.3em] text-[#6f6358]"></nav>
+        <nav className="flex flex-wrap items-center gap-6 text-xs font-semibold uppercase tracking-[0.3em] text-[#8b7a66]"></nav>
       </header>
 
       <main className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-24">
         <section className="grid gap-10 pb-20 pt-2 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="space-y-6">
-            <p className="text-xs uppercase tracking-[0.35em] text-[#8b7a66]">
-              Wedding collections & experience
+            <p className="text-xs uppercase tracking-[0.4em] text-[#c9a86e] font-semibold">
+              Wedding Collections & Experience
             </p>
             <h2
-              className="text-4xl font-semibold leading-tight text-[#161410] sm:text-5xl"
+              className="text-5xl sm:text-6xl font-bold leading-tight text-[#2a1f1a]"
               style={{ fontFamily: "var(--font-playfair)" }}
             >
               Best for full wedding storytelling—from getting ready to reception
               energy.
             </h2>
-            <p className="max-w-xl text-base leading-relaxed text-[#5c5247]">
-              Scroll for a full pricing table, booking terms, and a transparent
-              step-by-step process. Every collection is shaped around your
-              story, with refined editing and a calm, guided experience.
+            <p
+              className="max-w-xl text-lg leading-relaxed text-[#6f5e52]"
+              style={{ fontFamily: "var(--font-cormorant)" }}
+            >
+              Every love story deserves to be told with grace and artistry. We
+              craft exceptional wedding photography that celebrates your unique
+              journey with refined elegance.
             </p>
             <div className="flex flex-wrap gap-4">
               <a
-                className="inline-flex items-center justify-center rounded-full bg-[#1b1915] px-6 py-3 text-xs font-semibold uppercase tracking-[0.25em] text-[#f8f3ed] transition hover:-translate-y-0.5 hover:bg-[#2b2620]"
+                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#2a1f1a] to-[#3a2a1f] px-8 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[#f9f4ee] transition hover:-translate-y-1 hover:shadow-lg"
                 href="#pricing"
               >
-                View pricing
+                View Collections
               </a>
               <a
-                className="inline-flex items-center justify-center rounded-full border border-[#bda88b] px-6 py-3 text-xs font-semibold uppercase tracking-[0.25em] text-[#5c5247] transition hover:-translate-y-0.5 hover:border-[#1b1915] hover:text-[#1b1915]"
+                className="inline-flex items-center justify-center rounded-full border-2 border-[#c9a86e] px-8 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-[#2a1f1a] transition hover:-translate-y-1 hover:bg-[#c9a86e]/10"
                 href="https://shutterunit.com/contact"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Inquire now
+                Get in Touch
               </a>
             </div>
           </div>
@@ -572,21 +575,21 @@ export default function Home() {
 
           <div
             suppressHydrationWarning
-            className="rounded-[28px] border border-[#e6d9c8] bg-white/90 p-5 shadow-[0_24px_60px_-45px_rgba(32,24,16,0.6)]"
+            className="rounded-[28px] border border-[#e6d9c8] bg-white/95 p-8 shadow-[0_24px_60px_-45px_rgba(32,24,16,0.6)]"
           >
-            <p className="text-xs uppercase tracking-[0.35em] text-[#8b7a66]">
-              Full Pricing Table
+            <p className="text-xs uppercase tracking-[0.4em] text-[#c9a86e] font-semibold">
+              Our Collections
             </p>
             {isDesktop ? (
-              <div className="mt-4 overflow-x-auto rounded-2xl border border-[#e6d9c8]">
+              <div className="mt-6 overflow-x-auto rounded-2xl border border-[#d9c9b8]">
                 <table className="w-full text-left text-[13px]">
-                  <thead className="bg-[#f1e7db] text-[11px] uppercase tracking-[0.28em] text-[#6f6358]">
+                  <thead className="bg-gradient-to-r from-[#f5ede3] to-[#ede3d8] text-[11px] uppercase tracking-[0.3em] text-[#8b7a66]">
                     <tr>
-                      <th className="px-4 py-4">Collection</th>
-                      <th className="px-4 py-4">Price</th>
-                      <th className="px-4 py-4">Coverage</th>
-                      <th className="px-4 py-4">Includes</th>
-                      <th className="px-4 py-4">Turnaround</th>
+                      <th className="px-4 py-4 font-semibold">Collection</th>
+                      <th className="px-4 py-4 font-semibold">Price</th>
+                      <th className="px-4 py-4 font-semibold">Coverage</th>
+                      <th className="px-4 py-4 font-semibold">Includes</th>
+                      <th className="px-4 py-4 font-semibold">Turnaround</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white">
@@ -601,16 +604,16 @@ export default function Home() {
                       return (
                         <Fragment key={item.id}>
                           <tr
-                            className={`border-t border-[#efe5d8] align-top transition ${
-                              isSelected ? "bg-[#fff8ef]" : "hover:bg-[#fbf8f4]"
+                            className={`border-t border-[#ede3d8] align-top transition ${
+                              isSelected ? "bg-[#fef9f3]" : "hover:bg-[#faf8f6]"
                             }`}
                           >
                             <td className="px-4 py-4 font-semibold">
                               <div className="flex items-start justify-between gap-3">
                                 <div>
-                                  <p>{item.name}</p>
+                                  <p className="text-[#2a1f1a]">{item.name}</p>
                                   {item.highlight ? (
-                                    <span className="mt-2 inline-flex rounded-full bg-[#1b1915] px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-[#f8f3ed]">
+                                    <span className="mt-2 inline-flex rounded-full bg-gradient-to-r from-[#c9a86e] to-[#d4a86e] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white font-semibold">
                                       {item.highlight}
                                     </span>
                                   ) : null}
@@ -805,7 +808,7 @@ export default function Home() {
                                           )
                                         }
                                         disabled={isSubmitting}
-                                        className="w-full rounded-full bg-[#6f6358] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f8f3ed] transition hover:-translate-y-0.5 hover:bg-[#5c5247] disabled:opacity-50"
+                                        className="w-full rounded-full bg-gradient-to-r from-[#b8956a] to-[#c9a86e] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50"
                                       >
                                         {isSubmitting
                                           ? "Submitting..."
@@ -817,7 +820,7 @@ export default function Home() {
                                           handlePaymentClick(item.id)
                                         }
                                         disabled={processingPayment}
-                                        className="w-full rounded-full bg-[#1b1915] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f8f3ed] transition hover:-translate-y-0.5 hover:bg-[#2b2620] disabled:opacity-50"
+                                        className="w-full rounded-full bg-gradient-to-r from-[#2a1f1a] to-[#3a2a1f] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f9f4ee] transition hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50"
                                       >
                                         Pay 20% Retainer
                                       </button>
@@ -1039,7 +1042,7 @@ export default function Home() {
                                   handleSubmitContract(item.id, item.name)
                                 }
                                 disabled={isSubmitting}
-                                className="w-full rounded-full bg-[#6f6358] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f8f3ed] disabled:opacity-50"
+                                className="w-full rounded-full bg-gradient-to-r from-[#b8956a] to-[#c9a86e] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-white disabled:opacity-50"
                               >
                                 {isSubmitting
                                   ? "Submitting..."
@@ -1049,7 +1052,7 @@ export default function Home() {
                                 type="button"
                                 onClick={() => handlePaymentClick(item.id)}
                                 disabled={processingPayment}
-                                className="w-full rounded-full bg-[#1b1915] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f8f3ed] disabled:opacity-50"
+                                className="w-full rounded-full bg-gradient-to-r from-[#2a1f1a] to-[#3a2a1f] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f9f4ee] disabled:opacity-50"
                               >
                                 Pay 20% Retainer
                               </button>

@@ -1,52 +1,113 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f4f1;
-  --foreground: #161410;
-  --muted: #7f746a;
-  --accent: #b48a52;
-  --accent-soft: #e5d6c3;
+  --background: #faf8f6;
+  --foreground: #2a1f1a;
+  --muted: #9d8b7e;
+  --accent: #c9a86e;
+  --accent-soft: #ede3d8;
+  --rose: #d4a5a5;
+  --gold: #d4af37;
+  --cream: #fef9f3;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-serif: var(--font-playfair);
+  --font-display: var(--font-playfair);
+  --font-body: var(--font-cormorant);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0f0e0c;
-    --foreground: #f3f0ec;
-    --muted: #b7aea4;
-    --accent: #d2a86b;
-    --accent-soft: #3a2f22;
+    --background: #1a1410;
+    --foreground: #f5f0eb;
+    --muted: #b7a99a;
+    --accent: #d4a86e;
+    --accent-soft: #3a2f24;
+    --rose: #e8c4c4;
+    --gold: #f4d03f;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-cormorant), Georgia, serif;
+  letter-spacing: 0.02em;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-weight: 600;
   letter-spacing: 0.01em;
+  line-height: 1.3;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--foreground);
 }
 
 .grain-overlay {
   background-image: radial-gradient(
       circle at 20% 20%,
-      rgba(255, 255, 255, 0.5),
+      rgba(255, 255, 255, 0.6),
       rgba(255, 255, 255, 0)
     ),
-    radial-gradient(circle at 80% 30%, rgba(212, 179, 129, 0.25), transparent),
-    radial-gradient(circle at 60% 80%, rgba(168, 137, 91, 0.18), transparent);
+    radial-gradient(
+      circle at 80% 30%,
+      rgba(212, 175, 129, 0.3),
+      transparent
+    ),
+    radial-gradient(
+      circle at 60% 80%,
+      rgba(180, 138, 82, 0.2),
+      transparent
+    );
   mix-blend-mode: multiply;
   pointer-events: none;
-  opacity: 0.55;
+  opacity: 0.45;
+}
+
+/* Romantic flourishes */
+.romantic-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--accent) 20%,
+    var(--accent) 80%,
+    transparent
+  );
+}
+
+.romantic-accent {
+  color: var(--gold);
+}
+
+/* Smooth transitions */
+* {
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+button,
+a {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Text styling */
+.text-elegant {
+  font-family: var(--font-playfair);
+  font-weight: 500;
+  letter-spacing: 0.05em;
 }
 
 .float-slow {
