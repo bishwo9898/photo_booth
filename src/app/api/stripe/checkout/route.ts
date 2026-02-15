@@ -57,17 +57,22 @@ export async function POST(request: Request) {
   });
 
   try {
-    const charge = await stripe.charges.create({
+    const chargeParams: Stripe.ChargeCreateParams = {
       amount: pkg.retainerAmount,
       currency: "usd",
       source: token,
       description: `${pkg.name} - 20% Wedding Photography Retainer`,
-      receipt_email: customerEmail,
       metadata: {
         packageId,
-        customerName,
+        ...(customerName ? { customerName } : {}),
       },
-    });
+    };
+
+    if (customerEmail) {
+      chargeParams.receipt_email = customerEmail;
+    }
+
+    const charge = await stripe.charges.create(chargeParams);
 
     return NextResponse.json({
       success: true,
