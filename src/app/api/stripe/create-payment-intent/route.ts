@@ -6,15 +6,15 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const packagePricing = {
   essential: {
     name: "Essential Collection",
-    retainerAmount: 36000,
+    retainerAmount: 18000,
   },
   signature: {
     name: "Signature Collection",
-    retainerAmount: 52000,
+    retainerAmount: 26000,
   },
   luxury: {
     name: "Luxury Collection",
-    retainerAmount: 68000,
+    retainerAmount: 34000,
   },
 } as const;
 
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: pkg.retainerAmount,
       currency: "usd",
-      description: `${pkg.name} - 20% Wedding Photography Retainer`,
+      description: `${pkg.name} - 10% Wedding Photography Retainer`,
       receipt_email: customerEmail,
       metadata: {
         packageId,

@@ -246,9 +246,9 @@ export default function Home() {
 
   const getRetainerAmount = (packageId: string) => {
     const pricing: Record<string, number> = {
-      essential: 36000,
-      signature: 52000,
-      luxury: 68000,
+      essential: 18000,
+      signature: 26000,
+      luxury: 34000,
     };
     return pricing[packageId] || 0;
   };
@@ -852,7 +852,7 @@ export default function Home() {
                                       signature.
                                     </p>
                                     <p className="mt-2 text-xs text-[#8b7a66]">
-                                      A 20% retainer reserves your date.
+                                      A 10% retainer reserves your date.
                                     </p>
                                     <div className="mt-4 grid gap-3">
                                       <input
@@ -953,7 +953,7 @@ export default function Home() {
                                         disabled={processingPayment}
                                         className="w-full rounded-full bg-gradient-to-r from-[#2a1f1a] to-[#3a2a1f] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f9f4ee] transition hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50"
                                       >
-                                        Pay 20% Retainer
+                                        Pay 10% Retainer
                                       </button>
                                     </div>
                                     <p className="mt-3 text-xs text-[#8b7a66]">
@@ -1093,7 +1093,7 @@ export default function Home() {
                               details and adding your signature.
                             </p>
                             <p className="mt-2 text-xs text-[#8b7a66]">
-                              A 20% retainer reserves your date.
+                              A 10% retainer reserves your date.
                             </p>
                             <div className="mt-4 grid gap-3">
                               <input
@@ -1185,7 +1185,7 @@ export default function Home() {
                                 disabled={processingPayment}
                                 className="w-full rounded-full bg-gradient-to-r from-[#2a1f1a] to-[#3a2a1f] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f9f4ee] disabled:opacity-50"
                               >
-                                Pay 20% Retainer
+                                Pay 10% Retainer
                               </button>
                             </div>
                             <p className="mt-3 text-xs text-[#8b7a66]">
@@ -1458,7 +1458,7 @@ export default function Home() {
                     <div className="border-t border-[#e6d9c8] pt-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-semibold text-[#8b7a66]">
-                          20% Retainer
+                          10% Retainer
                         </span>
                         <span className="text-base font-bold text-[#1b1915]">
                           ${retainerAmountFormatted}

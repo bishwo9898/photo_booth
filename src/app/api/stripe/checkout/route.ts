@@ -4,19 +4,19 @@ import nodemailer from "nodemailer";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
-// 20% retainer amounts (in cents)
+// 10% retainer amounts (in cents)
 const packagePricing = {
   essential: {
     name: "Essential Collection",
-    retainerAmount: 36000, // 20% of $1,800
+    retainerAmount: 18000, // 10% of $1,800
   },
   signature: {
     name: "Signature Collection",
-    retainerAmount: 52000, // 20% of $2,600
+    retainerAmount: 26000, // 10% of $2,600
   },
   luxury: {
     name: "Luxury Collection",
-    retainerAmount: 68000, // 20% of $3,400
+    retainerAmount: 34000, // 10% of $3,400
   },
 } as const;
 
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       amount: pkg.retainerAmount,
       currency: "usd",
       source: token,
-      description: `${pkg.name} - 20% Wedding Photography Retainer`,
+      description: `${pkg.name} - 10% Wedding Photography Retainer`,
       metadata: {
         packageId,
         ...(customerName ? { customerName } : {}),
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
                 ` : ''}
                 <div style="margin-top: 16px;">
                   <p class="label">Payment Amount</p>
-                  <p class="value">$${(pkg.retainerAmount / 100).toFixed(2)} (20% Retainer)</p>
+                  <p class="value">$${(pkg.retainerAmount / 100).toFixed(2)} (10% Retainer)</p>
                 </div>
                 <div style="margin-top: 16px;">
                   <p class="label">Transaction ID</p>
