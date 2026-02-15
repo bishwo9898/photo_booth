@@ -30,6 +30,26 @@ const heroShots = [
     alt: "Wedding vows in warm light",
     label: "Vows",
   },
+  {
+    src: "/weddings/eunice-197.webp",
+    alt: "Bride getting ready moment",
+    label: "Getting Ready",
+  },
+  {
+    src: "/weddings/eunice-261.webp",
+    alt: "Couple's tender moment",
+    label: "Intimate",
+  },
+  {
+    src: "/weddings/eunice-187.webp",
+    alt: "Reception dance and joy",
+    label: "Celebration",
+  },
+  {
+    src: "/weddings/eunice-three.webp",
+    alt: "Golden hour romance",
+    label: "Romance",
+  },
 ];
 
 const packages = [
@@ -42,16 +62,16 @@ const packages = [
     highlight: null,
     previewShots: [
       {
+        src: "/weddings/eunice-197.webp",
+        alt: "Bride getting ready details",
+      },
+      {
         src: "/weddings/eunice-260.webp",
-        alt: "Soft ceremony details",
+        alt: "Ceremony vows moment",
       },
       {
-        src: "/weddings/eunice-246.webp",
-        alt: "Golden hour portraits",
-      },
-      {
-        src: "/weddings/eunice-211.webp",
-        alt: "Vows in warm light",
+        src: "/weddings/eunice-80.jpg",
+        alt: "Newlyweds' first kiss",
       },
     ],
     includes: [
@@ -74,15 +94,15 @@ const packages = [
     previewShots: [
       {
         src: "/weddings/eunice-246.webp",
-        alt: "Golden hour couple",
+        alt: "Golden hour couple portraits",
       },
       {
         src: "/weddings/groom-25.webp",
-        alt: "Reception celebration",
+        alt: "Reception celebration and dancing",
       },
       {
-        src: "/weddings/eunice-260.webp",
-        alt: "Classic ceremony moment",
+        src: "/weddings/eunice-three.webp",
+        alt: "Romantic couple moment",
       },
     ],
     includes: [
@@ -103,16 +123,16 @@ const packages = [
     highlight: null,
     previewShots: [
       {
-        src: "/weddings/groom-25.webp",
-        alt: "Evening celebration",
+        src: "/weddings/eunice-299.jpg",
+        alt: "Detailed wedding preparations",
       },
       {
-        src: "/weddings/eunice-211.webp",
-        alt: "Romantic vows",
+        src: "/weddings/eunice-187.webp",
+        alt: "Vibrant reception moments",
       },
       {
-        src: "/weddings/eunice-246.webp",
-        alt: "Editorial couple portrait",
+        src: "/weddings/eunice-six.webp",
+        alt: "Evening celebration highlights",
       },
     ],
     includes: [
@@ -175,6 +195,29 @@ const processSteps = [
   },
 ];
 
+const galleryImages = [
+  { src: "/weddings/eunice-260.webp", alt: "Wedding ceremony portrait" },
+  { src: "/weddings/eunice-246.webp", alt: "Wedding couple golden hour" },
+  { src: "/weddings/eunice-211.webp", alt: "Wedding vows in warm light" },
+  { src: "/weddings/groom-25.webp", alt: "Wedding reception celebration" },
+  { src: "/weddings/eunice-197.webp", alt: "Bride getting ready" },
+  { src: "/weddings/eunice-261.webp", alt: "Couple's tender moment" },
+  { src: "/weddings/eunice-299.jpg", alt: "Wedding details and decor" },
+  { src: "/weddings/eunice-187.webp", alt: "Reception dance joy" },
+  { src: "/weddings/eunice-80.jpg", alt: "Ceremony details" },
+  { src: "/weddings/eunice-three.webp", alt: "Golden hour romance" },
+  { src: "/weddings/eunice-six.webp", alt: "Reception celebration" },
+  { src: "/weddings/eunice-four.webp", alt: "Bride and groom embrace" },
+  { src: "/weddings/n1.jpg", alt: "Wedding preparation" },
+  { src: "/weddings/n3.jpg", alt: "Intimate moment" },
+  { src: "/weddings/n4.jpg", alt: "Reception energy" },
+  { src: "/weddings/n10.jpg", alt: "Couple's joy" },
+  { src: "/weddings/n3.webp", alt: "Golden light details" },
+  { src: "/weddings/n7.webp", alt: "Evening celebration" },
+  { src: "/weddings/n10.webp", alt: "Final moments" },
+  { src: "/weddings/n20.webp", alt: "Timeless portrait" },
+];
+
 export default function Home() {
   const [activeShot, setActiveShot] = useState(heroShots[0]);
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(
@@ -184,6 +227,9 @@ export default function Home() {
     Record<string, boolean>
   >({});
   const [isDesktop, setIsDesktop] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<
+    (typeof galleryImages)[0] | null
+  >(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isDrawingRef = useRef(false);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
@@ -278,6 +324,12 @@ export default function Home() {
             return;
           }
 
+          // Get signature from canvas
+          const canvas = canvasRef.current;
+          const signatureDataUrl = canvas
+            ? canvas.toDataURL("image/png")
+            : undefined;
+
           try {
             const response = await fetch("/api/stripe/payment", {
               method: "POST",
@@ -287,6 +339,8 @@ export default function Home() {
                 token: token?.id,
                 customerName: form?.fullName,
                 customerEmail: form?.email,
+                weddingDate: form?.weddingDate,
+                signature: signatureDataUrl,
               }),
             });
 
@@ -1116,6 +1170,42 @@ export default function Home() {
           </div>
         </section>
 
+        <section id="gallery" className="pb-20">
+          <div className="mb-8 space-y-3">
+            <p className="text-xs uppercase tracking-[0.35em] text-[#8b7a66]">
+              Gallery
+            </p>
+            <h3
+              className="text-3xl font-semibold text-[#1b1915]"
+              style={{ fontFamily: "var(--font-playfair)" }}
+            >
+              Moments we've captured.
+            </h3>
+            <p className="max-w-2xl text-sm text-[#6f6358]">
+              Each photograph tells a story. Click any image to view it in full
+              detail.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {galleryImages.map((image, index) => (
+              <button
+                key={index}
+                onClick={() => setSelectedImage(image)}
+                className="group relative aspect-square overflow-hidden rounded-xl border border-[#e6d9c8] bg-[#ede3d8] transition hover:border-[#c9a86e]"
+              >
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill
+                  sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 18vw"
+                  className="object-cover transition-transform group-hover:scale-105 duration-300"
+                />
+                <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
+              </button>
+            ))}
+          </div>
+        </section>
+
         <section id="process" className="pb-20">
           <div className="mb-6">
             <p className="text-xs uppercase tracking-[0.35em] text-[#8b7a66]">
@@ -1218,6 +1308,35 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Image Lightbox Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          onClick={() => setSelectedImage(null)}
+        >
+          <button
+            onClick={() => setSelectedImage(null)}
+            className="absolute top-6 right-6 text-3xl text-white transition hover:text-[#c9a86e] z-60"
+            aria-label="Close"
+          >
+            ×
+          </button>
+          <div
+            className="relative max-h-[90vh] max-w-[90vw] w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={selectedImage.src}
+              alt={selectedImage.alt}
+              width={1200}
+              height={800}
+              className="h-full w-full object-contain rounded-lg"
+              priority
+            />
+          </div>
+        </div>
+      )}
 
       {/* Payment Interface */}
       {showPayment && (
