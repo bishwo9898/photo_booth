@@ -359,6 +359,18 @@ export default function Home() {
             const messageDiv = document.getElementById("payment-message");
 
             try {
+              // Submit the form to validate payment element
+              const submitResult = await elements.submit();
+              if (submitResult.error) {
+                if (messageDiv) {
+                  messageDiv.textContent =
+                    submitResult.error.message || "Validation failed";
+                  messageDiv.classList.add("text-red-600");
+                }
+                setProcessingPayment(false);
+                return;
+              }
+
               const { error, paymentIntent } = await stripe.confirmPayment({
                 elements,
                 clientSecret,
