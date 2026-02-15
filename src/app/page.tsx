@@ -609,16 +609,14 @@ export default function Home() {
               className="text-5xl sm:text-6xl font-bold leading-tight text-[#2a1f1a]"
               style={{ fontFamily: "var(--font-playfair)" }}
             >
-              Best for full wedding storytelling—from getting ready to reception
-              energy.
+              How do you want your wedding to feel like?
             </h2>
             <p
               className="max-w-xl text-lg leading-relaxed text-[#6f5e52]"
               style={{ fontFamily: "var(--font-cormorant)" }}
             >
-              Every love story deserves to be told with grace and artistry. We
-              craft exceptional wedding photography that celebrates your unique
-              journey with refined elegance.
+              Best for full wedding storytelling—from getting ready to reception
+              energy.
             </p>
             <div className="flex flex-wrap gap-4">
               <a
