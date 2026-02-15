@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   PaymentElement,
   useStripe,
   useElements,
-} from '@stripe/react-stripe-js';
+} from "@stripe/react-stripe-js";
 
 interface PaymentFormProps {
   clientSecret: string;
@@ -44,7 +44,7 @@ export default function PaymentForm({
     });
 
     if (error) {
-      setErrorMessage(error.message || 'An error occurred');
+      setErrorMessage(error.message || "An error occurred");
       setIsLoading(false);
     } else {
       onSuccess();
@@ -57,9 +57,7 @@ export default function PaymentForm({
         <p className="text-sm font-semibold text-[#1b1915]">
           20% Retainer Payment
         </p>
-        <p className="mt-1 text-xs text-[#8b7a66]">
-          {packageName} Collection
-        </p>
+        <p className="mt-1 text-xs text-[#8b7a66]">{packageName} Collection</p>
         <p className="mt-2 text-lg font-bold text-[#1b1915]">
           ${(amount / 100).toFixed(2)}
         </p>
@@ -88,7 +86,7 @@ export default function PaymentForm({
             disabled={!stripe || isLoading}
             className="flex-1 rounded-full bg-[#1b1915] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f8f3ed] transition hover:bg-[#2b2620] disabled:opacity-50"
           >
-            {isLoading ? 'Processing...' : 'Pay Now'}
+            {isLoading ? "Processing..." : "Pay Now"}
           </button>
         </div>
       </form>

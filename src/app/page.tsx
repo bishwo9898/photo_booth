@@ -8,8 +8,6 @@ import {
   useRef,
   useState,
 } from "react";
-import PaymentForm from "./components/PaymentForm";
-import { StripeElementsProvider } from "./components/StripeElementsProvider";
 
 const heroShots = [
   {
@@ -193,15 +191,8 @@ export default function Home() {
     Record<string, { fullName: string; email: string; weddingDate: string }>
   >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [paymentState, setPaymentState] = useState<{
-    clientSecret: string;
-    packageId: string;
-    packageName: string;
-    amount: number;
-  } | null>(null);
-  const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [isLoadingPayment, setIsLoadingPayment] = useState(false);
+  const [showPayment, setShowPayment] = useState<string | null>(null);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   const toggleIncludes = (id: string) => {
     setExpandedIncludes((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -255,6 +246,71 @@ export default function Home() {
     prepareSignatureCanvas();
   }, [isDesktop, selectedPackageId]);
 
+  useEffect(() => {
+    if (!showPayment) return;
+
+    const initStripe = async () => {
+      const stripeLib = await import("@stripe/stripe-js");
+      const stripe = await stripeLib.loadStripe(
+        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+      );
+      if (!stripe) return;
+
+      const elements = stripe.elements();
+      const cardElement = elements.create("card");
+
+      const cardElementDiv = document.getElementById("card-element");
+      if (cardElementDiv) {
+        cardElement.mount(cardElementDiv);
+      }
+
+      const form = formData[showPayment];
+      const submitBtn = document.getElementById("submit-payment");
+      if (submitBtn) {
+        submitBtn.addEventListener("click", async () => {
+          setProcessingPayment(true);
+          const cardErrorDiv = document.getElementById("card-errors");
+
+          const { token, error } = await stripe.createToken(cardElement);
+          if (error) {
+            if (cardErrorDiv) cardErrorDiv.textContent = error.message || "";
+            setProcessingPayment(false);
+            return;
+          }
+
+          try {
+            const response = await fetch("/api/stripe/payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                packageId: showPayment,
+                token: token?.id,
+                customerName: form?.fullName,
+                customerEmail: form?.email,
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error("Payment failed");
+            }
+
+            alert("Payment successful! Thank you for booking with us.");
+            setShowPayment(null);
+          } catch (error) {
+            if (cardErrorDiv) {
+              cardErrorDiv.textContent =
+                error instanceof Error ? error.message : "Payment failed";
+            }
+          } finally {
+            setProcessingPayment(false);
+          }
+        });
+      }
+    };
+
+    initStripe();
+  }, [showPayment, formData]);
+
   const getCanvasPoint = (
     event: PointerEvent<HTMLCanvasElement>,
   ): { x: number; y: number } | null => {
@@ -298,55 +354,27 @@ export default function Home() {
     prepareSignatureCanvas();
   };
 
-  const handleStripeCheckout = async (packageId: string) => {
-    setIsLoadingPayment(true);
-    setPaymentError(null);
-    
-    try {
-      const response = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packageId }),
-      });
-
-      if (!response.ok) {
-        setPaymentError("Unable to start checkout. Please try again.");
-        setIsLoadingPayment(false);
-        return;
-      }
-
-      const data = (await response.json()) as {
-        clientSecret?: string;
-        packageId?: string;
-        amount?: number;
-      };
-
-      if (!data.clientSecret || !data.packageId) {
-        setPaymentError("Invalid payment response. Please try again.");
-        setIsLoadingPayment(false);
-        return;
-      }
-
-      const selectedPkg = packages.find((p) => p.id === packageId);
-      if (!selectedPkg) {
-        setPaymentError("Package not found.");
-        setIsLoadingPayment(false);
-        return;
-      }
-
-      setPaymentState({
-        clientSecret: data.clientSecret,
-        packageId: data.packageId,
-        packageName: selectedPkg.name,
-        amount: data.amount || 0,
-      });
-      setShowPaymentForm(true);
-    } catch (error) {
-      console.error("Checkout error:", error);
-      setPaymentError("An error occurred. Please try again.");
-    } finally {
-      setIsLoadingPayment(false);
+  const handlePaymentClick = (packageId: string) => {
+    const form = formData[packageId];
+    if (!form?.fullName || !form?.email || !form?.weddingDate) {
+      alert("Please fill in all form fields first.");
+      return;
     }
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height);
+    const hasSignature = imageData?.data.some(
+      (pixel, i) => i % 4 !== 3 && pixel !== 254,
+    );
+
+    if (!hasSignature) {
+      alert("Please add your signature before proceeding to payment.");
+      return;
+    }
+
+    setShowPayment(packageId);
   };
 
   const handleSubmitContract = async (
@@ -437,20 +465,7 @@ export default function Home() {
             Ever after
           </h1>
         </div>
-        <nav className="flex flex-wrap items-center gap-6 text-xs font-semibold uppercase tracking-[0.3em] text-[#6f6358]">
-          <a className="transition hover:text-[#1b1915]" href="#pricing">
-            Pricing
-          </a>
-          <a className="transition hover:text-[#1b1915]" href="#terms">
-            Booking Terms
-          </a>
-          <a className="transition hover:text-[#1b1915]" href="#process">
-            Process
-          </a>
-          <a className="transition hover:text-[#1b1915]" href="#contact">
-            Contact
-          </a>
-        </nav>
+        <nav className="flex flex-wrap items-center gap-6 text-xs font-semibold uppercase tracking-[0.3em] text-[#6f6358]"></nav>
       </header>
 
       <main className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-24">
@@ -463,8 +478,8 @@ export default function Home() {
               className="text-4xl font-semibold leading-tight text-[#161410] sm:text-5xl"
               style={{ fontFamily: "var(--font-playfair)" }}
             >
-              Pricing crafted like a magazine spread—clean, clear, and designed
-              for modern weddings.
+              Best for full wedding storytelling—from getting ready to reception
+              energy.
             </h2>
             <p className="max-w-xl text-base leading-relaxed text-[#5c5247]">
               Scroll for a full pricing table, booking terms, and a transparent
@@ -555,7 +570,10 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="rounded-[28px] border border-[#e6d9c8] bg-white/90 p-5 shadow-[0_24px_60px_-45px_rgba(32,24,16,0.6)]">
+          <div
+            suppressHydrationWarning
+            className="rounded-[28px] border border-[#e6d9c8] bg-white/90 p-5 shadow-[0_24px_60px_-45px_rgba(32,24,16,0.6)]"
+          >
             <p className="text-xs uppercase tracking-[0.35em] text-[#8b7a66]">
               Full Pricing Table
             </p>
@@ -796,14 +814,12 @@ export default function Home() {
                                       <button
                                         type="button"
                                         onClick={() =>
-                                          handleStripeCheckout(item.id)
+                                          handlePaymentClick(item.id)
                                         }
-                                        disabled={isLoadingPayment}
+                                        disabled={processingPayment}
                                         className="w-full rounded-full bg-[#1b1915] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f8f3ed] transition hover:-translate-y-0.5 hover:bg-[#2b2620] disabled:opacity-50"
                                       >
-                                        {isLoadingPayment
-                                          ? "Loading..."
-                                          : "Pay 20% Retainer"}
+                                        Pay 20% Retainer
                                       </button>
                                     </div>
                                     <p className="mt-3 text-xs text-[#8b7a66]">
@@ -1031,15 +1047,11 @@ export default function Home() {
                               </button>
                               <button
                                 type="button"
-                                onClick={() =>
-                                  handleStripeCheckout(item.id)
-                                }
-                                disabled={isLoadingPayment}
+                                onClick={() => handlePaymentClick(item.id)}
+                                disabled={processingPayment}
                                 className="w-full rounded-full bg-[#1b1915] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f8f3ed] disabled:opacity-50"
                               >
-                                {isLoadingPayment
-                                  ? "Loading..."
-                                  : "Pay 20% Retainer"}
+                                Pay 20% Retainer
                               </button>
                             </div>
                             <p className="mt-3 text-xs text-[#8b7a66]">
@@ -1204,8 +1216,8 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Payment Modal */}
-      {showPaymentForm && paymentState && (
+      {/* Payment Interface */}
+      {showPayment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
@@ -1213,41 +1225,26 @@ export default function Home() {
                 Complete Payment
               </h2>
               <button
-                onClick={() => {
-                  setShowPaymentForm(false);
-                  setPaymentState(null);
-                  setPaymentError(null);
-                }}
+                onClick={() => setShowPayment(null)}
                 className="text-2xl text-[#8b7a66] transition hover:text-[#1b1915]"
               >
                 ×
               </button>
             </div>
 
-            {paymentError && (
-              <div className="mb-4 rounded-lg bg-red-50 p-3">
-                <p className="text-sm text-red-700">{paymentError}</p>
-              </div>
-            )}
+            <div
+              id="card-element"
+              className="mb-4 rounded-lg border border-[#dac9b0] bg-white p-4"
+            />
+            <div id="card-errors" className="mb-4 text-sm text-red-600" />
 
-            <StripeElementsProvider>
-              <div key={paymentState.clientSecret}>
-                <PaymentForm
-                  clientSecret={paymentState.clientSecret}
-                  amount={paymentState.amount}
-                  packageName={paymentState.packageName}
-                  onSuccess={() => {
-                    setShowPaymentForm(false);
-                    setPaymentState(null);
-                  }}
-                  onCancel={() => {
-                    setShowPaymentForm(false);
-                    setPaymentState(null);
-                    setPaymentError(null);
-                  }}
-                />
-              </div>
-            </StripeElementsProvider>
+            <button
+              id="submit-payment"
+              disabled={processingPayment}
+              className="w-full rounded-full bg-[#1b1915] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f8f3ed] transition hover:bg-[#2b2620] disabled:opacity-50"
+            >
+              {processingPayment ? "Processing..." : "Complete Payment"}
+            </button>
           </div>
         </div>
       )}
