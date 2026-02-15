@@ -240,6 +240,19 @@ export default function Home() {
   const [showPayment, setShowPayment] = useState<string | null>(null);
   const [processingPayment, setProcessingPayment] = useState(false);
 
+  const getPackageInfo = (packageId: string) => {
+    return packages.find((p) => p.id === packageId);
+  };
+
+  const getRetainerAmount = (packageId: string) => {
+    const pricing: Record<string, number> = {
+      essential: 36000,
+      signature: 52000,
+      luxury: 68000,
+    };
+    return pricing[packageId] || 0;
+  };
+
   const toggleIncludes = (id: string) => {
     setExpandedIncludes((prev) => ({ ...prev, [id]: !prev[id] }));
   };
@@ -302,63 +315,115 @@ export default function Home() {
       );
       if (!stripe) return;
 
-      const elements = stripe.elements();
-      const cardElement = elements.create("card");
-
-      const cardElementDiv = document.getElementById("card-element");
-      if (cardElementDiv) {
-        cardElement.mount(cardElementDiv);
-      }
-
       const form = formData[showPayment];
-      const submitBtn = document.getElementById("submit-payment");
-      if (submitBtn) {
-        submitBtn.addEventListener("click", async () => {
-          setProcessingPayment(true);
-          const cardErrorDiv = document.getElementById("card-errors");
 
-          const { token, error } = await stripe.createToken(cardElement);
-          if (error) {
-            if (cardErrorDiv) cardErrorDiv.textContent = error.message || "";
-            setProcessingPayment(false);
-            return;
-          }
-
-          // Get signature from canvas
-          const canvas = canvasRef.current;
-          const signatureDataUrl = canvas
-            ? canvas.toDataURL("image/png")
-            : undefined;
-
-          try {
-            const response = await fetch("/api/stripe/payment", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                packageId: showPayment,
-                token: token?.id,
-                customerName: form?.fullName,
-                customerEmail: form?.email,
-                weddingDate: form?.weddingDate,
-                signature: signatureDataUrl,
-              }),
-            });
-
-            if (!response.ok) {
-              throw new Error("Payment failed");
-            }
-
-            alert("Payment successful! Thank you for booking with us.");
-            setShowPayment(null);
-          } catch (error) {
-            if (cardErrorDiv) {
-              cardErrorDiv.textContent =
-                error instanceof Error ? error.message : "Payment failed";
-            }
-          } finally {
-            setProcessingPayment(false);
-          }
+      try {
+        // Create Payment Intent
+        const piResponse = await fetch("/api/stripe/create-payment-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            packageId: showPayment,
+            customerEmail: form?.email,
+            customerName: form?.fullName,
+          }),
         });
+
+        if (!piResponse.ok) {
+          const errorData = await piResponse.json();
+          throw new Error(errorData.error || "Failed to create payment intent");
+        }
+
+        const { clientSecret } = await piResponse.json();
+
+        const elements = stripe.elements({
+          clientSecret,
+        });
+
+        const paymentElement = elements.create("payment");
+        const paymentElementDiv = document.getElementById("payment-element");
+        if (
+          paymentElementDiv &&
+          !paymentElementDiv.querySelector("[data-stripe]")
+        ) {
+          paymentElement.mount("#payment-element");
+        }
+
+        const formElement = document.getElementById("payment-form");
+        const submitBtn = document.getElementById("submit-payment");
+
+        if (formElement && submitBtn) {
+          formElement.addEventListener("submit", async (e: Event) => {
+            e.preventDefault();
+            setProcessingPayment(true);
+            const messageDiv = document.getElementById("payment-message");
+
+            try {
+              const { error, paymentIntent } = await stripe.confirmPayment({
+                elements,
+                clientSecret,
+                confirmParams: {
+                  return_url: `${window.location.origin}?payment=true`,
+                },
+                redirect: "if_required",
+              });
+
+              if (error) {
+                if (messageDiv) {
+                  messageDiv.textContent = error.message || "Payment failed";
+                  messageDiv.classList.add("text-red-600");
+                }
+                setProcessingPayment(false);
+                return;
+              }
+
+              if (paymentIntent?.status === "succeeded") {
+                // Get signature from canvas
+                const canvas = canvasRef.current;
+                const signatureDataUrl = canvas
+                  ? canvas.toDataURL("image/png")
+                  : undefined;
+
+                // Confirm payment on backend and send email
+                const confirmResponse = await fetch("/api/stripe/payment", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    paymentIntentId: paymentIntent.id,
+                    customerName: form?.fullName,
+                    customerEmail: form?.email,
+                    weddingDate: form?.weddingDate,
+                    signature: signatureDataUrl,
+                  }),
+                });
+
+                if (!confirmResponse.ok) {
+                  throw new Error("Failed to confirm payment");
+                }
+
+                alert("Payment successful! Thank you for booking with us.");
+                setShowPayment(null);
+              }
+            } catch (err) {
+              if (messageDiv) {
+                messageDiv.textContent =
+                  err instanceof Error ? err.message : "Payment failed";
+                messageDiv.classList.add("text-red-600");
+              }
+            } finally {
+              setProcessingPayment(false);
+            }
+          });
+        }
+      } catch (error) {
+        const messageDiv = document.getElementById("payment-message");
+        if (messageDiv) {
+          messageDiv.textContent =
+            error instanceof Error
+              ? error.message
+              : "Failed to initialize payment";
+          messageDiv.classList.add("text-red-600");
+        }
       }
     };
 
@@ -1339,37 +1404,83 @@ export default function Home() {
       )}
 
       {/* Payment Interface */}
-      {showPayment && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-[#1b1915]">
-                Complete Payment
-              </h2>
-              <button
-                onClick={() => setShowPayment(null)}
-                className="text-2xl text-[#8b7a66] transition hover:text-[#1b1915]"
-              >
-                ×
-              </button>
+      {showPayment &&
+        (() => {
+          const pkg = getPackageInfo(showPayment);
+          const retainerAmount = getRetainerAmount(showPayment);
+          const retainerAmountFormatted = (retainerAmount / 100).toFixed(2);
+
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+              <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-[#1b1915]">
+                    Complete Payment
+                  </h2>
+                  <button
+                    onClick={() => setShowPayment(null)}
+                    className="text-2xl text-[#8b7a66] transition hover:text-[#1b1915]"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {/* Payment Details */}
+                <div className="mb-6 rounded-xl bg-[#f7f4f1] p-4">
+                  <p className="text-xs uppercase tracking-[0.3em] text-[#8b7a66]">
+                    Order Summary
+                  </p>
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6f6358]">Package</span>
+                      <span className="font-semibold text-[#1b1915]">
+                        {pkg?.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6f6358]">Coverage</span>
+                      <span className="text-sm text-[#5c5247]">
+                        {pkg?.coverage}
+                      </span>
+                    </div>
+                    <div className="border-t border-[#e6d9c8] pt-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-[#8b7a66]">
+                          20% Retainer
+                        </span>
+                        <span className="text-base font-bold text-[#1b1915]">
+                          ${retainerAmountFormatted}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="pt-2 text-xs text-[#8b7a66]">
+                      Pay now to reserve your date. Balance due 14 days before
+                      wedding.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Payment Form */}
+                <form id="payment-form" className="space-y-4">
+                  <div
+                    id="payment-element"
+                    className="rounded-lg border border-[#dac9b0] bg-white p-4"
+                  />
+                  <div id="payment-message" className="text-sm" />
+                  <button
+                    id="submit-payment"
+                    disabled={processingPayment}
+                    className="w-full rounded-full bg-[#1b1915] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f8f3ed] transition hover:bg-[#2b2620] disabled:opacity-50"
+                  >
+                    {processingPayment
+                      ? "Processing..."
+                      : `Pay $${retainerAmountFormatted}`}
+                  </button>
+                </form>
+              </div>
             </div>
-
-            <div
-              id="card-element"
-              className="mb-4 rounded-lg border border-[#dac9b0] bg-white p-4"
-            />
-            <div id="card-errors" className="mb-4 text-sm text-red-600" />
-
-            <button
-              id="submit-payment"
-              disabled={processingPayment}
-              className="w-full rounded-full bg-[#1b1915] px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#f8f3ed] transition hover:bg-[#2b2620] disabled:opacity-50"
-            >
-              {processingPayment ? "Processing..." : "Complete Payment"}
-            </button>
-          </div>
-        </div>
-      )}
+          );
+        })()}
     </div>
   );
 }
